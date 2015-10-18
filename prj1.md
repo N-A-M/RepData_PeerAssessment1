@@ -165,7 +165,7 @@ comparing the two histograms we find that data is more concentrated around the m
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-In this part a day field and a day type field are added to the data frame 
+In this part a day field and a day type field are added to the data frame then the dataframe is subsetted based on the day type to two distinct data frames one for weekdays and another for weekends. 
 
 
 
@@ -178,11 +178,40 @@ dayT <- function(n) {
     if(n %in% c("Saturday","Sunday"))  {val <- as.character("weekend")  }
     val
     }
-fullData[,"dayType"] <- sapply(fullData$day, dayT)
 
-boxplot(fullData$steps ~ fullData$dayType ,data=fullData, col="red")                        
+fullData[,"dayType"] <- sapply(fullData$day, dayT)
+fullData$dayType <- factor(fullData$dayType, levels=c("weekday","weekend"))
+weekdayData <- fullData[fullData$dayType == "weekday",]
+weekdayData <- data.frame(Steps=tapply(weekdayData$steps,weekdayData$interval,mean,na.rm=T)
+                            ,Interval=unique(weekdayData$interval))
+weekendData <- fullData[fullData$dayType == "weekend",]
+weekendData <- data.frame(Steps=tapply(weekendData$steps,weekendData$interval,mean,na.rm=T)
+                            ,Interval=unique(weekendData$interval))
+
+par(mfcol=c(1,2))
+plot(
+     weekdayData$Interval
+     ,weekdayData$Steps
+     ,type="l"
+     ,col='red'
+     ,main = "Weekdays"
+     ,ylab = "Average steps in 5 min interval"
+     ,xlab = "Interval in min")
+abline(h=mean(weekdayData$Steps),col="red")
+plot(
+     weekendData$Interval
+     ,weekendData$Steps
+     ,type="l"
+     ,col='blue'
+     ,main = "Weekends"
+     ,ylab = "Average steps in 5 min interval"
+     ,xlab = "Interval in min")
+abline(h=mean(weekendData$Steps),col="blue")
 ```
 
 ![](prj1_files/figure-html/unnamed-chunk-6-1.png) 
  
-The boxplot shows that in weekdays the data are more concentrated towards the mean. 
+### conclusion 
+The panel plots of the two time series shows the following:  
+1  In weekdays number of steps are distributed over a wider range of values than those in weekend.  
+2  In weekdays the early day intervals shows higher number of steps than later intervals while in weekdays such distinction is absent. 
